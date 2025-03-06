@@ -1,0 +1,14 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/.vs
+/BlazorSecurityApp/.vs/BlazorSecurityApp
+/BlazorSecurityApp/BlazorSecurityApp.Api/bin/Debug/net8.0
+/BlazorSecurityApp/BlazorSecurityApp.Api/obj
+/BlazorSecurityApp/BlazorSecurityApp.BusinessLayer/bin/Debug/net8.0
+/BlazorSecurityApp/BlazorSecurityApp.BusinessLayer/obj
+/BlazorSecurityApp/BlazorSecurityApp.Core/bin/Debug/net8.0
+/BlazorSecurityApp/BlazorSecurityApp.Core/obj
+/BlazorSecurityApp/BlazorSecurityApp.Web/bin/Debug/net8.0
+/BlazorSecurityApp/BlazorSecurityApp.Web/obj

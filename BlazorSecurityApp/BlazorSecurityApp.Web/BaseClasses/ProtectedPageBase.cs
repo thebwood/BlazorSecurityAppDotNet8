@@ -68,7 +68,7 @@ namespace BlazorSecurityApp.Web.BaseClasses
             Logger.LogInformation("Handling authentication failure");
             // Log the user out and redirect to the login page
             AuthenticationStateProvider?.MarkUserAsLoggedOut();
-            NavigationManager.NavigateTo("/login", forceLoad: true);
+            NavigationManager.NavigateTo("/", forceLoad: true);
         }
 
         protected virtual bool IsUserAuthorized() => true;

@@ -30,7 +30,7 @@ namespace BlazorSecurityApp.Web.Security
 
             if (IsTokenExpired(token))
             {
-                _navigationManager.NavigateTo("/login");
+                _navigationManager.NavigateTo("/");
                 return new AuthenticationState(_anonymous);
             }
 

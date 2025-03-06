@@ -6,6 +6,7 @@ using System.Text;
 using BlazorSecurityApp.BusinessLayer.Extensions;
 using BlazorSecurityApp.Api.Middlewares;
 using Microsoft.OpenApi.Models;
+using Serilog;
 
 string siteCorsPolicy = "SiteCorsPolicy";
 
@@ -82,13 +83,19 @@ builder.Services.AddAuthentication(options =>
 });
 
 // Add Authorization
-builder.Services.AddAuthorization(options =>
+builder.Services.AddAuthorization();
+
+
+builder.Host.UseSerilog((context, services, configuration) =>
 {
-    // Add your authorization policies here if needed
+    configuration.ReadFrom.Configuration(context.Configuration);
 });
 
+builder.Services.AddLogging(loggingBuilder =>
+{
+    loggingBuilder.AddSerilog();
+});
 var app = builder.Build();
-
 app.UseMiddleware<GlobalExceptionMiddleware>();
 
 if (app.Environment.IsDevelopment())

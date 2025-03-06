@@ -1,6 +1,6 @@
-﻿using BlazorSecurityApp.Web.Services.Interfaces;
-using Microsoft.AspNetCore.Components.Authorization;
+﻿using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using System.Net.Http.Headers;
 using System.Security.Claims;
 using Microsoft.IdentityModel.JsonWebTokens;
@@ -9,19 +9,20 @@ namespace BlazorSecurityApp.Web.Security
 {
     public class CustomAuthenticationStateProvider : AuthenticationStateProvider, IComponent
     {
-        private readonly IStorageService _storageService;
+        private readonly ProtectedSessionStorage _sessionStorage;
         private readonly NavigationManager _navigationManager;
         private ClaimsPrincipal _anonymous = new ClaimsPrincipal(new ClaimsIdentity());
+        private bool _isRendered;
 
-        public CustomAuthenticationStateProvider(IStorageService storageService, NavigationManager navigationManager)
+        public CustomAuthenticationStateProvider(ProtectedSessionStorage sessionStorage, NavigationManager navigationManager)
         {
-            _storageService = storageService;
+            _sessionStorage = sessionStorage;
             _navigationManager = navigationManager;
         }
 
         public override async Task<AuthenticationState> GetAuthenticationStateAsync()
         {
-            var token = await _storageService.GetAccessTokenAsync();
+            var token = await GetAccessTokenAsync();
 
             if (string.IsNullOrEmpty(token))
             {
@@ -52,15 +53,46 @@ namespace BlazorSecurityApp.Web.Security
             return jwtToken.Claims;
         }
 
-        public async Task<string?> GetTokenAsync()
+        public async Task<string?> GetAccessTokenAsync()
         {
-            return await _storageService.GetAccessTokenAsync();
+            if (_isRendered)
+            {
+                var tokenResult = await _sessionStorage.GetAsync<string>("accessToken");
+                return tokenResult.Success ? tokenResult.Value : null;
+            }
+            return null;
+        }
+
+        public async Task SetAccessTokenAsync(string token)
+        {
+            await _sessionStorage.SetAsync("accessToken", token);
+        }
+
+        public async Task<string?> GetRefreshTokenAsync()
+        {
+            if (_isRendered)
+            {
+                var tokenResult = await _sessionStorage.GetAsync<string>("refreshToken");
+                return tokenResult.Success ? tokenResult.Value : null;
+            }
+            return null;
+        }
+
+        public async Task SetRefreshTokenAsync(string refreshToken)
+        {
+            await _sessionStorage.SetAsync("refreshToken", refreshToken);
+        }
+
+        public async Task ClearStorageAsync()
+        {
+            await _sessionStorage.DeleteAsync("accessToken");
+            await _sessionStorage.DeleteAsync("refreshToken");
         }
 
         public async Task MarkUserAsAuthenticated(string token, string refreshToken)
         {
-            await _storageService.SetAccessTokenAsync(token);
-            await _storageService.SetRefreshTokenAsync(refreshToken);
+            await SetAccessTokenAsync(token);
+            await SetRefreshTokenAsync(refreshToken);
             var user = new ClaimsPrincipal(new ClaimsIdentity(ParseClaimsFromJwt(token), "jwt"));
 
             NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(user)));
@@ -68,13 +100,13 @@ namespace BlazorSecurityApp.Web.Security
 
         public async Task MarkUserAsLoggedOut()
         {
-            await _storageService.ClearStorageAsync();
+            await ClearStorageAsync();
             NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(_anonymous)));
         }
 
         public async Task<bool> SetAuthorizationHeaderAsync(HttpClient httpClient)
         {
-            var token = await _storageService.GetAccessTokenAsync();
+            var token = await GetAccessTokenAsync();
             if (token != null)
             {
                 httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
@@ -98,8 +130,9 @@ namespace BlazorSecurityApp.Web.Security
         {
             if (firstRender)
             {
-                _storageService.OnAfterRender(firstRender);
+                _isRendered = true;
             }
         }
     }
 }
+

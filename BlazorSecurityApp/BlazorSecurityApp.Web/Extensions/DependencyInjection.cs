@@ -23,17 +23,17 @@ namespace BlazorSecurityApp.Web.Extensions
                 .WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(retryAttempt));
 
             // Add HttpClient with retry policy and exception handling
-            services.AddHttpClient<IAuthClient, AuthClient>((serviceProvider, client) => {
+            services.AddHttpClient<IAuthClient, AuthClient>((serviceProvider, client) =>
+            {
                 ApiSettings? apiSettings = serviceProvider.GetRequiredService<IOptions<ApiSettings>>().Value;
                 client.BaseAddress = new Uri(baseAddress);
-
             })
                 .AddPolicyHandler(retryPolicy); // Attach the retry policy
 
             services.AddScoped<IStorageService, StorageService>();
             services.AddScoped<CustomAuthenticationStateProvider>();
             services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();
-            services.AddTransient<ProtectedLocalStorage>();
+            services.AddTransient<ProtectedSessionStorage>();
             services.AddTransient<LoginViewModel>();
             services.AddTransient<LogoutViewModel>();
 

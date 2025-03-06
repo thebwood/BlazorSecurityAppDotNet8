@@ -6,58 +6,42 @@ namespace BlazorSecurityApp.Web.Services
 {
     public class StorageService : IStorageService
     {
-        private readonly ProtectedLocalStorage _localStorage;
+        private readonly ProtectedSessionStorage _sessionStorage;
         private readonly IJSRuntime _jsRuntime;
-        private bool _isRendered;
 
-        public StorageService(ProtectedLocalStorage localStorage, IJSRuntime jsRuntime)
+        public StorageService(ProtectedSessionStorage sessionStorage, IJSRuntime jsRuntime)
         {
-            _localStorage = localStorage;
+            _sessionStorage = sessionStorage;
             _jsRuntime = jsRuntime;
         }
 
         public async Task SetAccessTokenAsync(string token)
         {
-            await _localStorage.SetAsync("accessToken", token);
+            await _sessionStorage.SetAsync("accessToken", token);
         }
 
         public async Task<string?> GetAccessTokenAsync()
         {
-            if (_isRendered)
-            {
-                var tokenResult = await _localStorage.GetAsync<string>("accessToken");
-                return tokenResult.Success ? tokenResult.Value : null;
-            }
-            return null;
+            var tokenResult = await _sessionStorage.GetAsync<string>("accessToken");
+            return tokenResult.Success ? tokenResult.Value : null;
         }
 
         public async Task SetRefreshTokenAsync(string refreshToken)
         {
-            await _localStorage.SetAsync("refreshToken", refreshToken);
+            await _sessionStorage.SetAsync("refreshToken", refreshToken);
         }
 
         public async Task<string?> GetRefreshTokenAsync()
         {
-            if (_isRendered)
-            {
-                var tokenResult = await _localStorage.GetAsync<string>("refreshToken");
-                return tokenResult.Success ? tokenResult.Value : null;
-            }
-            return null;
+            var tokenResult = await _sessionStorage.GetAsync<string>("refreshToken");
+            return tokenResult.Success ? tokenResult.Value : null;
         }
 
         public async Task ClearStorageAsync()
         {
-            await _localStorage.DeleteAsync("accessToken");
-            await _localStorage.DeleteAsync("refreshToken");
-        }
-
-        public void OnAfterRender(bool firstRender)
-        {
-            if (firstRender)
-            {
-                _isRendered = true;
-            }
+            await _sessionStorage.DeleteAsync("accessToken");
+            await _sessionStorage.DeleteAsync("refreshToken");
         }
     }
 }
+

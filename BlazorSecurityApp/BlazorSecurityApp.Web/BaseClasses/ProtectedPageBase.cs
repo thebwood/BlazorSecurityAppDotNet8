@@ -32,17 +32,17 @@ namespace BlazorSecurityApp.Web.BaseClasses
                 return;
             }
 
+            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            if (authState == null)
+            {
+                Logger.LogError("AuthenticationState is null");
+                HandleAuthenticationFailure();
+                return;
+            }
 
 
             if (_isRendered)
             {
-                var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-                if (authState == null)
-                {
-                    Logger.LogError("AuthenticationState is null");
-                    HandleAuthenticationFailure();
-                    return;
-                }
 
                 User = authState.User;
                 await RefreshTokenAsync();
@@ -51,11 +51,8 @@ namespace BlazorSecurityApp.Web.BaseClasses
 
         protected override async Task OnAfterRenderAsync(bool firstRender)
         {
-            if (firstRender)
-            {
-                _isRendered = true;
-                await RefreshTokenAsync();
-            }
+            _isRendered = true;
+            await RefreshTokenAsync();
         }
 
         private async Task RefreshTokenAsync()

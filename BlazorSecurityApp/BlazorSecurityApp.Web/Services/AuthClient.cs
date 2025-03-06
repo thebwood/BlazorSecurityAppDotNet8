@@ -14,10 +14,10 @@ namespace BlazorSecurityApp.Web.Services
         private readonly CustomAuthenticationStateProvider _authStateProvider;
         private readonly IConfiguration _configuration;
 
-        public AuthClient(HttpClient httpClient, CustomAuthenticationStateProvider authStateProver, IConfiguration configuration)
+        public AuthClient(HttpClient httpClient, CustomAuthenticationStateProvider authStateProvider, IConfiguration configuration)
         {
             _httpClient = httpClient;
-            _authStateProvider = authStateProver;
+            _authStateProvider = authStateProvider;
             _configuration = configuration;
         }
 
@@ -54,7 +54,6 @@ namespace BlazorSecurityApp.Web.Services
             string jsonPayload = JsonSerializer.Serialize(refreshRequest);
             StringContent? requestContent = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
 
-
             using HttpResponseMessage response = await _httpClient.PostAsync("api/auth/refresh", requestContent);
             string? content = await response.Content.ReadAsStringAsync();
             var result = JsonSerializer.Deserialize<Result<RefreshUserTokenResponseDTO>>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new();
@@ -70,6 +69,5 @@ namespace BlazorSecurityApp.Web.Services
 
             return result;
         }
-
     }
 }

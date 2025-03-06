@@ -7,7 +7,5 @@
         Task SetRefreshTokenAsync(string refreshToken);
         Task<string?> GetRefreshTokenAsync();
         Task ClearStorageAsync();
-        void OnAfterRender(bool firstRender);
-
     }
 }

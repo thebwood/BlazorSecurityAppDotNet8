@@ -13,7 +13,9 @@ builder.Services.AddRazorComponents()
 
 builder.Services.Configure<ApiSettings>(builder.Configuration.GetSection("ApiSettings"));
 ApiSettings? apiSettings = builder.Configuration.GetSection("ApiSettings").Get<ApiSettings>();
+
 builder.Services.AddPresentation(apiSettings.BaseUrl);
+
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -38,6 +40,11 @@ builder.Services.AddLogging(loggingBuilder =>
 {
     loggingBuilder.AddSerilog();
 });
+
+// Configure CircuitOptions for detailed errors
+builder.Services.AddServerSideBlazor()
+    .AddCircuitOptions(options => { options.DetailedErrors = true; });
+
 
 var app = builder.Build();
 

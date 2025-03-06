@@ -1,7 +1,17 @@
-﻿<CascadingAuthenticationState>
+﻿@using BlazorSecurityApp.Web.Security
+@inject CustomAuthenticationStateProvider AuthenticationStateProvider
+
+<CascadingAuthenticationState>
     <Router AppAssembly="@typeof(App).Assembly">
         <Found Context="routeData">
-            <RouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)" />
+            <AuthorizeView>
+                <Authorized>
+                    <RouteView RouteData="routeData" DefaultLayout="typeof(SecuredLayout)" />
+                </Authorized>
+                <NotAuthorized>
+                    <RouteView RouteData="routeData" DefaultLayout="typeof(MainLayout)" />
+                </NotAuthorized>
+            </AuthorizeView>
             <FocusOnNavigate RouteData="routeData" Selector="h1" />
         </Found>
         <NotFound>

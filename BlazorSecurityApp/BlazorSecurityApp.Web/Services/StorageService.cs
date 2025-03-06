@@ -7,10 +7,13 @@ namespace BlazorSecurityApp.Web.Services
     public class StorageService : IStorageService
     {
         private readonly ProtectedLocalStorage _localStorage;
+        private readonly IJSRuntime _jsRuntime;
+        private bool _isRendered;
 
-        public StorageService(ProtectedLocalStorage localStorage)
+        public StorageService(ProtectedLocalStorage localStorage, IJSRuntime jsRuntime)
         {
             _localStorage = localStorage;
+            _jsRuntime = jsRuntime;
         }
 
         public async Task SetAccessTokenAsync(string token)
@@ -20,8 +23,12 @@ namespace BlazorSecurityApp.Web.Services
 
         public async Task<string?> GetAccessTokenAsync()
         {
-            var tokenResult = await _localStorage.GetAsync<string>("accessToken");
-            return tokenResult.Success ? tokenResult.Value : null;
+            if (_isRendered)
+            {
+                var tokenResult = await _localStorage.GetAsync<string>("accessToken");
+                return tokenResult.Success ? tokenResult.Value : null;
+            }
+            return null;
         }
 
         public async Task SetRefreshTokenAsync(string refreshToken)
@@ -31,14 +38,26 @@ namespace BlazorSecurityApp.Web.Services
 
         public async Task<string?> GetRefreshTokenAsync()
         {
-            var tokenResult = await _localStorage.GetAsync<string>("refreshToken");
-            return tokenResult.Success ? tokenResult.Value : null;
+            if (_isRendered)
+            {
+                var tokenResult = await _localStorage.GetAsync<string>("refreshToken");
+                return tokenResult.Success ? tokenResult.Value : null;
+            }
+            return null;
         }
 
         public async Task ClearStorageAsync()
         {
             await _localStorage.DeleteAsync("accessToken");
             await _localStorage.DeleteAsync("refreshToken");
+        }
+
+        public void OnAfterRender(bool firstRender)
+        {
+            if (firstRender)
+            {
+                _isRendered = true;
+            }
         }
     }
 }

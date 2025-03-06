@@ -2,4 +2,11 @@
 @page "/addresses"
 @attribute [Authorize]
 
-<h3>Welcome to Addresses</h3>
+<AuthorizeView>
+    <Authorized>
+        Test
+    </Authorized>
+    <NotAuthorized>
+        You are not authorized
+    </NotAuthorized>
+</AuthorizeView>

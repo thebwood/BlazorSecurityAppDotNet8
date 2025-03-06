@@ -19,6 +19,7 @@ namespace BlazorSecurityApp.Web.BaseClasses
         protected ILogger<ProtectedPageBase> Logger { get; set; } = default!;
 
         protected ClaimsPrincipal? User { get; private set; }
+        private bool _isRendered;
 
         protected override async Task OnInitializedAsync()
         {
@@ -41,13 +42,30 @@ namespace BlazorSecurityApp.Web.BaseClasses
 
             User = authState.User;
 
+            if (_isRendered)
+            {
+                await RefreshTokenAsync();
+            }
+        }
+
+        protected override async Task OnAfterRenderAsync(bool firstRender)
+        {
+            if (firstRender)
+            {
+                _isRendered = true;
+                await RefreshTokenAsync();
+            }
+        }
+
+        private async Task RefreshTokenAsync()
+        {
             var refreshToken = await StorageService.GetRefreshTokenAsync();
             if (!string.IsNullOrEmpty(refreshToken))
             {
                 Result<RefreshUserTokenResponseDTO>? result = await AuthClient.RefreshTokenAsync(refreshToken);
                 if (result.Success)
                 {
-                    await AuthenticationStateProvider.MarkUserAsAuthenticated( result.Value.Token, result.Value.RefreshToken);
+                    await AuthenticationStateProvider.MarkUserAsAuthenticated(result.Value.Token, result.Value.RefreshToken);
                 }
                 else
                 {
@@ -60,7 +78,6 @@ namespace BlazorSecurityApp.Web.BaseClasses
                 Logger.LogWarning("Refresh token is null or empty");
                 HandleAuthenticationFailure();
             }
-
         }
 
         private void HandleAuthenticationFailure()

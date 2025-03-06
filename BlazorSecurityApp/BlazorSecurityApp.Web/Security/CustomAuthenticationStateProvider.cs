@@ -7,7 +7,7 @@ using Microsoft.IdentityModel.JsonWebTokens;
 
 namespace BlazorSecurityApp.Web.Security
 {
-    public class CustomAuthenticationStateProvider : AuthenticationStateProvider
+    public class CustomAuthenticationStateProvider : AuthenticationStateProvider, IComponent
     {
         private readonly IStorageService _storageService;
         private readonly NavigationManager _navigationManager;
@@ -57,7 +57,6 @@ namespace BlazorSecurityApp.Web.Security
             return await _storageService.GetAccessTokenAsync();
         }
 
-
         public async Task MarkUserAsAuthenticated(string token, string refreshToken)
         {
             await _storageService.SetAccessTokenAsync(token);
@@ -82,6 +81,25 @@ namespace BlazorSecurityApp.Web.Security
                 return true;
             }
             return false;
+        }
+
+        public void Attach(RenderHandle renderHandle)
+        {
+            // Implementation for IComponent.Attach
+        }
+
+        public Task SetParametersAsync(ParameterView parameters)
+        {
+            // Implementation for IComponent.SetParametersAsync
+            return Task.CompletedTask;
+        }
+
+        public void OnAfterRender(bool firstRender)
+        {
+            if (firstRender)
+            {
+                _storageService.OnAfterRender(firstRender);
+            }
         }
     }
 }

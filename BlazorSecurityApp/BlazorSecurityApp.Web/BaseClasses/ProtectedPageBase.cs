@@ -32,18 +32,19 @@ namespace BlazorSecurityApp.Web.BaseClasses
                 return;
             }
 
-            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-            if (authState == null)
-            {
-                Logger.LogError("AuthenticationState is null");
-                HandleAuthenticationFailure();
-                return;
-            }
 
-            User = authState.User;
 
             if (_isRendered)
             {
+                var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+                if (authState == null)
+                {
+                    Logger.LogError("AuthenticationState is null");
+                    HandleAuthenticationFailure();
+                    return;
+                }
+
+                User = authState.User;
                 await RefreshTokenAsync();
             }
         }
